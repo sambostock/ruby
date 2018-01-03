@@ -1893,6 +1893,25 @@ rb_mod_modfunc(int argc, VALUE *argv, VALUE module)
     return module;
 }
 
+/*
+ *  call-seq:
+ *    private_module_function(symbol, ...)    -> self
+ *    private_module_function(string, ...)    -> self
+ *
+ *  Same as <code>module_function</code>, but makes both the module level function and instance method private.
+ *
+ *  TODO: Elaborate on this documentation
+ */
+
+static VALUE
+rb_mod_private_modfunc(int argc, VALUE *argv, VALUE module)
+{
+  rb_mod_modfunc(argc, argv, module);
+  rb_mod_private_method(argc, argv, obj);
+
+  return module;
+}
+
 int
 rb_method_basic_definition_p(VALUE klass, ID id)
 {
@@ -2116,6 +2135,7 @@ Init_eval_method(void)
     rb_define_private_method(rb_cModule, "protected", rb_mod_protected, -1);
     rb_define_private_method(rb_cModule, "private", rb_mod_private, -1);
     rb_define_private_method(rb_cModule, "module_function", rb_mod_modfunc, -1);
+    rb_define_private_method(rb_cModule, "private_module_function", rb_mod_private_modfunc, -1);
 
     rb_define_method(rb_cModule, "method_defined?", rb_mod_method_defined, 1);
     rb_define_method(rb_cModule, "public_method_defined?", rb_mod_public_method_defined, 1);
