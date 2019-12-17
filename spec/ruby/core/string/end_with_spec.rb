@@ -53,4 +53,35 @@ describe "String#end_with?" do
       "あれ".end_with?(pat)
     end.should raise_error(Encoding::CompatibilityError)
   end
+
+  ruby_version_is "2.7" do
+    it "supports regexps" do
+      regexp = /[o5]/
+      "hello".should.end_with?(regexp)
+      "12345".should.end_with?(regexp)
+      "foxes are 1337".should_not.end_with?(regexp)
+      "chunky12\nbacon".should_not.end_with?(/12/)
+    end
+
+    it "supports regexps with ^ and $ modifiers" do
+      regexp1 = /\d{2}$/
+      regexp2 = /^\d{2}/
+      "test12".should.end_with?(regexp1)
+      "12test".should_not.end_with?(regexp1)
+      "test12".should_not.end_with?(regexp2)
+      "12test".should_not.end_with?(regexp2)
+    end
+
+    it "sets Regexp.last_match if it returns true" do
+      regexp = /test-(\d+)/
+      "test-1337".end_with?(regexp).should be_true
+      Regexp.last_match.should_not be_nil
+      Regexp.last_match[1].should == "1337"
+      $1.should == "1337"
+
+      "test-asdf".end_with?(regexp).should be_false
+      Regexp.last_match.should be_nil
+      $1.should be_nil
+    end
+  end
 end
