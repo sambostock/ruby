@@ -1684,6 +1684,14 @@ rb_reg_start_with_p(VALUE re, VALUE str)
     return true;
 }
 
+bool
+rb_reg_end_with_p(VALUE re, VALUE str)
+{
+    // TODO: Implement this based off rb_reg_start_with_p
+
+    return false;
+}
+
 VALUE
 rb_reg_nth_defined(int nth, VALUE match)
 {
