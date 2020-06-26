@@ -9,7 +9,9 @@ describe "Range#minmax" do
 
   it "min should return the minimum element" do
     (4..10).minmax.should == [4, 10]
-    (4..11).minmax.should == [4, 10]
+    (4...10).minmax.should == [4, 9]
+    ('a'..'c').minmax.should == ['a', 'c']
+    ('a'...'c').minmax.should == ['a', 'b']
 
     skip
     # @enum.minmax.should == [4, 10]
