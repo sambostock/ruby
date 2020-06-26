@@ -1266,7 +1266,18 @@ range_minmax(VALUE range)
     if (rb_block_given_p()) {
         return rb_call_super(0, NULL);
     }
-    return rb_assoc_new(range_min(0, NULL, range), range_max(0, NULL, range));
+    // FIXME: Because range_max sometimes delegates to super, it needs
+    // its own execution context to work properly, or else when we call
+    // it from here and it calls super, it will actually call
+    // Enumerable#minmax, instead of Enumerable#max, cause the
+    // execution context still things we're in Range#minmax
+
+    return rb_assoc_new(
+        // range_min(0, NULL, range),
+        rb_funcall(range, rb_intern("min"), 0),
+        // range_max(0, NULL, range)
+        rb_funcall(range, rb_intern("max"), 0)
+    );
 }
 
 int
