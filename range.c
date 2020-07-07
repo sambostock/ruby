@@ -1220,7 +1220,7 @@ range_max(int argc, VALUE *argv, VALUE range)
 	rb_raise(rb_eRangeError, "cannot get the maximum of endless range");
     }
 
-    if (rb_block_given_p() || (EXCL(range) && !nm) || argc) {
+    if (rb_block_given_p() || (EXCL(range) && !nm) || argc || (nm && (e - RANGE_BEG(range)) % 1.0 == 0)) { // FIXME: Get step size from somewhere?
         if (NIL_P(RANGE_BEG(range))) {
             rb_raise(rb_eRangeError, "cannot get the maximum of beginless range with custom comparison method");
         }

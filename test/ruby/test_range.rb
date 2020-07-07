@@ -110,6 +110,7 @@ class TestRange < Test::Unit::TestCase
 
     assert_equal(2.0, (1.0..2.0).max)
     assert_equal(nil, (2.0..1.0).max)
+    assert_equal(3, (1..3.1).max)
     assert_raise(TypeError) { (1.0...2.0).max }
     assert_raise(TypeError) { (1...1.5).max }
     assert_raise(TypeError) { (1.5...2).max }
@@ -149,6 +150,9 @@ class TestRange < Test::Unit::TestCase
 
     assert_equal(['a', 'c'], ('a'..'c').minmax)
     assert_equal(['a', 'b'], ('a'...'c').minmax)
+
+    assert_equal([1, 3], (1..3.1).minmax)
+    assert_equal([1, 3], (1...3.1).minmax)
   end
 
   def test_initialize_twice
