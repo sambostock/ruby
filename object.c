@@ -4080,6 +4080,45 @@ rb_obj_dig(int argc, VALUE *argv, VALUE obj, VALUE notfound)
     return obj;
 }
 
+/*! \private */
+VALUE
+rb_obj_dig_bang(int argc, VALUE *argv, VALUE obj, VALUE notfound)
+{
+    struct dig_method hash = {Qnil}, ary = {Qnil}, strt = {Qnil};
+
+    for (; argc > 0; ++argv, --argc) {
+	if (NIL_P(obj)) return notfound;
+	if (!SPECIAL_CONST_P(obj)) {
+	    switch (BUILTIN_TYPE(obj)) {
+	      case T_HASH:
+		if (dig_basic_p(obj, &hash)) {
+		    obj = rb_hash_aref(obj, *argv);
+		    continue;
+		}
+		break;
+	      case T_ARRAY:
+		if (dig_basic_p(obj, &ary)) {
+		    obj = rb_ary_at(obj, *argv);
+		    continue;
+		}
+		break;
+	      case T_STRUCT:
+		if (dig_basic_p(obj, &strt)) {
+		    obj = rb_struct_lookup(obj, *argv);
+		    continue;
+		}
+		break;
+              default:
+                break;
+	    }
+	}
+        return rb_check_funcall_with_hook_kw(obj, id_dig, argc, argv,
+                                          no_dig_method, obj,
+                                          RB_NO_KEYWORDS);
+    }
+    return obj;
+}
+
 /*
  *  call-seq:
  *     format(format_string [, arguments...] )   -> string

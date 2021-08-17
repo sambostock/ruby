@@ -4593,6 +4593,23 @@ rb_hash_dig(int argc, VALUE *argv, VALUE self)
     return rb_obj_dig(argc, argv, self, Qnil);
 }
 
+/*
+ * TL;DR: Like dig, but keys must be present, like h[k] vs h.fetch(k)
+ * Maybe should take a block, like fetch does?
+ *
+ * TODO: Document this better
+ */
+
+static VALUE
+rb_hash_dig_bang(int argc, VALUE *argv, VALUE self)
+{
+    rb_check_arity(argc, 1, UNLIMITED_ARGUMENTS);
+    self = rb_hash_fetch_m(self, *argv);
+    if (!--argc) return self;
+    ++argv;
+    return rb_obj_dig_bang(argc, argv, self, Qnil);
+}
+
 static int
 hash_le_i(VALUE key, VALUE value, VALUE arg)
 {
@@ -7101,6 +7118,7 @@ Init_Hash(void)
 
     rb_define_method(rb_cHash, "any?", rb_hash_any_p, -1);
     rb_define_method(rb_cHash, "dig", rb_hash_dig, -1);
+    rb_define_method(rb_cHash, "dig!", rb_hash_dig_bang, -1);
 
     rb_define_method(rb_cHash, "<=", rb_hash_le, 1);
     rb_define_method(rb_cHash, "<", rb_hash_lt, 1);

@@ -1389,6 +1389,23 @@ rb_struct_dig(int argc, VALUE *argv, VALUE self)
 }
 
 /*
+ * TL;DR: Like dig, but keys must be present, like h[k] vs h.fetch(k)
+ * Maybe should take a block, like fetch does?
+ *
+ * TODO: Document this better
+ */
+
+static VALUE
+rb_struct_dig_bang(int argc, VALUE *argv, VALUE self)
+{
+    rb_check_arity(argc, 1, UNLIMITED_ARGUMENTS);
+    self = rb_struct_lookup(self, *argv);
+    if (!--argc) return self;
+    ++argv;
+    return rb_obj_dig(argc, argv, self, Qnil);
+}
+
+/*
  *  Document-class: Struct
  *
  *  A Struct is a convenient way to bundle a number of attributes together,
@@ -1449,6 +1466,7 @@ InitVM_Struct(void)
 
     rb_define_method(rb_cStruct, "members", rb_struct_members_m, 0);
     rb_define_method(rb_cStruct, "dig", rb_struct_dig, -1);
+    rb_define_method(rb_cStruct, "dig_bang", rb_struct_dig_bang, -1);
 
     rb_define_method(rb_cStruct, "deconstruct", rb_struct_to_a, 0);
     rb_define_method(rb_cStruct, "deconstruct_keys", rb_struct_deconstruct_keys, 1);

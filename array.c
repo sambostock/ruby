@@ -7737,6 +7737,23 @@ rb_ary_dig(int argc, VALUE *argv, VALUE self)
     return rb_obj_dig(argc, argv, self, Qnil);
 }
 
+/*
+ * TL;DR: Like dig, but index must be in range, like a[i] vs a.fetch(i)
+ * Maybe should take a block, like fetch does?
+ *
+ * TODO: Document this better
+ */
+
+static VALUE
+rb_ary_dig_bang(int argc, VALUE *argv, VALUE self)
+{
+    rb_check_arity(argc, 1, UNLIMITED_ARGUMENTS);
+    self = rb_ary_fetch(self, *argv);
+    if (!--argc) return self;
+    ++argv;
+    return rb_obj_dig_bang(argc, argv, self, Qnil);
+}
+
 static inline VALUE
 finish_exact_sum(long n, VALUE r, VALUE v, int z)
 {
@@ -8460,6 +8477,7 @@ Init_Array(void)
     rb_define_method(rb_cArray, "none?", rb_ary_none_p, -1);
     rb_define_method(rb_cArray, "one?", rb_ary_one_p, -1);
     rb_define_method(rb_cArray, "dig", rb_ary_dig, -1);
+    rb_define_method(rb_cArray, "dig!", rb_ary_dig_bang, -1);
     rb_define_method(rb_cArray, "sum", rb_ary_sum, -1);
 
     rb_define_method(rb_cArray, "deconstruct", rb_ary_deconstruct, 0);
