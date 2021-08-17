@@ -7751,7 +7751,7 @@ rb_ary_dig_bang(int argc, VALUE *argv, VALUE self)
     self = rb_ary_fetch(self, *argv);
     if (!--argc) return self;
     ++argv;
-    return rb_obj_dig_bang(argc, argv, self, Qnil);
+    return rb_obj_dig_bang(argc, argv, self);
 }
 
 static inline VALUE

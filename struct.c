@@ -1399,10 +1399,10 @@ static VALUE
 rb_struct_dig_bang(int argc, VALUE *argv, VALUE self)
 {
     rb_check_arity(argc, 1, UNLIMITED_ARGUMENTS);
-    self = rb_struct_lookup(self, *argv);
+    self = rb_struct_aref(self, *argv);
     if (!--argc) return self;
     ++argv;
-    return rb_obj_dig(argc, argv, self, Qnil);
+    return rb_obj_dig(argc, argv, self);
 }
 
 /*

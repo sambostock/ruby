@@ -4604,10 +4604,10 @@ static VALUE
 rb_hash_dig_bang(int argc, VALUE *argv, VALUE self)
 {
     rb_check_arity(argc, 1, UNLIMITED_ARGUMENTS);
-    self = rb_hash_fetch_m(self, *argv);
+    self = rb_hash_fetch(self, *argv);
     if (!--argc) return self;
     ++argv;
-    return rb_obj_dig_bang(argc, argv, self, Qnil);
+    return rb_obj_dig_bang(argc, argv, self);
 }
 
 static int

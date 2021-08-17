@@ -4020,6 +4020,7 @@ struct dig_method {
 };
 
 static ID id_dig;
+static ID id_dig_bang;
 
 static int
 dig_basic_p(VALUE obj, struct dig_method *cache)
@@ -4032,11 +4033,31 @@ dig_basic_p(VALUE obj, struct dig_method *cache)
     return cache->basic;
 }
 
+static int
+dig_bangbasic_p(VALUE obj, struct dig_method *cache)
+{
+    VALUE klass = RBASIC_CLASS(obj);
+    if (klass != cache->klass) {
+	cache->klass = klass;
+	cache->basic = rb_method_basic_definition_p(klass, id_dig_bang);
+    }
+    return cache->basic;
+}
+
 static void
 no_dig_method(int found, VALUE recv, ID mid, int argc, const VALUE *argv, VALUE data)
 {
     if (!found) {
 	rb_raise(rb_eTypeError, "%"PRIsVALUE" does not have #dig method",
+		 CLASS_OF(data));
+    }
+}
+
+static void
+no_dig_bang_method(int found, VALUE recv, ID mid, int argc, const VALUE *argv, VALUE data)
+{
+    if (!found) {
+	rb_raise(rb_eTypeError, "%"PRIsVALUE" does not have #dig_bang method",
 		 CLASS_OF(data));
     }
 }
@@ -4082,39 +4103,40 @@ rb_obj_dig(int argc, VALUE *argv, VALUE obj, VALUE notfound)
 
 /*! \private */
 VALUE
-rb_obj_dig_bang(int argc, VALUE *argv, VALUE obj, VALUE notfound)
+rb_obj_dig_bang(int argc, VALUE *argv, VALUE obj)
 {
     struct dig_method hash = {Qnil}, ary = {Qnil}, strt = {Qnil};
 
-    for (; argc > 0; ++argv, --argc) {
-	if (NIL_P(obj)) return notfound;
-	if (!SPECIAL_CONST_P(obj)) {
-	    switch (BUILTIN_TYPE(obj)) {
-	      case T_HASH:
-		if (dig_basic_p(obj, &hash)) {
-		    obj = rb_hash_aref(obj, *argv);
-		    continue;
-		}
-		break;
-	      case T_ARRAY:
-		if (dig_basic_p(obj, &ary)) {
-		    obj = rb_ary_at(obj, *argv);
-		    continue;
-		}
-		break;
-	      case T_STRUCT:
-		if (dig_basic_p(obj, &strt)) {
-		    obj = rb_struct_lookup(obj, *argv);
-		    continue;
-		}
-		break;
-              default:
-                break;
-	    }
-	}
-        return rb_check_funcall_with_hook_kw(obj, id_dig, argc, argv,
-                                          no_dig_method, obj,
-                                          RB_NO_KEYWORDS);
+    // FIXME: Undo the indentation changes from rb_obj_dig
+    for (; argc > 0; ++argv, --argc) { // Slide the window over the array of args
+        // if (NIL_P(obj)) return rb_raise(...); // FIXME: Will this fall through to reb_check_funcall_with_hook_kw automatically or do we need to deal with nil special case?
+        if (!SPECIAL_CONST_P(obj)) {
+            switch (BUILTIN_TYPE(obj)) {
+                case T_HASH:
+                    if (dig_bang_basic_p(obj, &hash)) {
+                        obj = rb_hash_fetch(obj, *argv);
+                        continue;
+                    }
+                    break;
+                case T_ARRAY:
+                    if (dig_bang_basic_p(obj, &ary)) {
+                        obj = rb_ary_fetch(obj, *argv);
+                        continue;
+                    }
+                    break;
+                case T_STRUCT:
+                    if (dig_bang_basic_p(obj, &strt)) {
+                        obj = rb_struct_aref(obj, *argv);
+                        continue;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        return rb_check_funcall_with_hook_kw(obj, id_dig_bang, argc, argv,
+                no_dig_bang_method, obj,
+                RB_NO_KEYWORDS);
     }
     return obj;
 }
@@ -4990,6 +5012,7 @@ void
 Init_Object(void)
 {
     id_dig = rb_intern_const("dig");
+    id_dig_bang = rb_intern_const("dig!");
     InitVM(Object);
 }
 
